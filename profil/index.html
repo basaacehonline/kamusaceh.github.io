@@ -210,14 +210,14 @@ footer.site li a:hover{opacity:1;border-color:currentColor}
 .md-msg.ok{border-color:var(--accent)}
 @media (max-width:520px){.md-row{grid-template-columns:minmax(0,1fr)}.md-panel{padding:26px 20px 22px}.hb{padding:7px 12px}}
 </style>
-<script src="config.js"></script>
+<script src="/config.js"></script>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <a class="brand" href="kontributor.html"><span class="brand-mark" aria-hidden="true">K</span>KAMUS ACEH</a>
+    <a class="brand" href="/kontributor"><span class="brand-mark" aria-hidden="true">K</span>KAMUS ACEH</a>
     <div class="tools">
-      <a class="pill" href="kontributor.html">&larr; Semua kontributor</a>
+      <a class="pill" href="/kontributor">&larr; Semua kontributor</a>
       <div class="hb-group"><button class="hb hb-add" type="button" data-open="add">+ Tambah kata</button><button class="hb" id="loginBtn" type="button" data-open="login">Login</button></div>
     </div>
   </header>
@@ -233,18 +233,18 @@ footer.site li a:hover{opacity:1;border-color:currentColor}
       <nav aria-label="Jelajahi">
         <h3>Jelajahi</h3>
         <ul>
-          <li><a href="index.html">Beranda</a></li>
-          <li><a href="entri.html">Halaman satu kata</a></li>
-          <li><a href="kontributor.html">Kontributor</a></li>
-          <li><a href="profil.html">Profil kontributor</a></li>
+          <li><a href="/">Beranda</a></li>
+          <li><a href="/entri/">Halaman satu kata</a></li>
+          <li><a href="/kontributor">Kontributor</a></li>
+          <li><a href="/profil/">Profil kontributor</a></li>
         </ul>
       </nav>
       <nav aria-label="Komunitas">
         <h3>Komunitas</h3>
         <ul>
-          <li><a href="kontributor.html#h-top">Tiga teratas</a></li>
-          <li><a href="kontributor.html#h-all">Semua kontributor</a></li>
-          <li><a href="kontributor.html#h-bd">Katalog lencana</a></li>
+          <li><a href="/kontributor#h-top">Tiga teratas</a></li>
+          <li><a href="/kontributor#h-all">Semua kontributor</a></li>
+          <li><a href="/kontributor#h-bd">Katalog lencana</a></li>
         </ul>
       </nav>
       <div>
@@ -312,7 +312,7 @@ function kamusMulai(RAW){
   }
 
   function render(){
-    var key=(location.hash||"").slice(1);
+    var key=decodeURIComponent((location.pathname.match(/^\/profil\/([^\/]+)/)||[])[1]||(location.hash||"").slice(1));
     var p=PEOPLE.filter(function(x){return x.slug===key})[0]||PEOPLE[0];
     document.title=p.n+" · Kamus Aceh";
 
@@ -386,13 +386,18 @@ function kamusMulai(RAW){
             '<dt>Bergabung</dt><dd>'+esc(p.j)+'</dd>'+
           '</dl></section>'+
           '<section class="blk"><h2>Kontributor lain</h2><div class="more">'+
-            PEOPLE.filter(function(x){return x!==p}).map(function(x){return '<a href="#'+x.slug+'">'+esc(x.n)+'</a>'}).join("")+
+            PEOPLE.filter(function(x){return x!==p}).map(function(x){return '<a href="/profil/'+encodeURIComponent(x.slug)+'" data-spa>'+esc(x.n)+'</a>'}).join("")+
           '</div></section>'+
         '</div>'+
       '</div>';
     window.scrollTo(0,0);
   }
-  window.addEventListener("hashchange",render);
+  window.addEventListener("popstate",render);
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a[data-spa]");
+    if(!a||e.metaKey||e.ctrlKey||e.shiftKey||e.button)return;
+    e.preventDefault();history.pushState(null,"",a.getAttribute("href"));render();window.scrollTo(0,0);
+  });
   render();
 }
 kamusAmbil("kontributor").then(function(r){if(!r||!r.ok)throw 0;kamusMulai(r.kontributor)}).catch(function(){kamusGalat()});

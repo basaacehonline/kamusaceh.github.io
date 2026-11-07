@@ -173,7 +173,7 @@ footer.site li a:hover{opacity:1;border-color:currentColor}
 .exdel{font:inherit;font-weight:800;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px 14px}
 @media (max-width:520px){.exrow{grid-template-columns:minmax(0,1fr)}}
 </style>
-<script src="config.js"></script>
+<script src="/config.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -232,18 +232,18 @@ footer.site li a:hover{opacity:1;border-color:currentColor}
       <nav aria-label="Jelajahi">
         <h3>Jelajahi</h3>
         <ul>
-          <li><a href="index.html">Beranda</a></li>
-          <li><a href="entri.html">Halaman satu kata</a></li>
-          <li><a href="kontributor.html">Kontributor</a></li>
-          <li><a href="profil.html">Profil kontributor</a></li>
+          <li><a href="/">Beranda</a></li>
+          <li><a href="/entri/">Halaman satu kata</a></li>
+          <li><a href="/kontributor">Kontributor</a></li>
+          <li><a href="/profil/">Profil kontributor</a></li>
         </ul>
       </nav>
       <nav aria-label="Komunitas">
         <h3>Komunitas</h3>
         <ul>
-          <li><a href="kontributor.html#h-top">Tiga teratas</a></li>
-          <li><a href="kontributor.html#h-all">Semua kontributor</a></li>
-          <li><a href="kontributor.html#h-bd">Katalog lencana</a></li>
+          <li><a href="/kontributor#h-top">Tiga teratas</a></li>
+          <li><a href="/kontributor#h-all">Semua kontributor</a></li>
+          <li><a href="/kontributor#h-bd">Katalog lencana</a></li>
         </ul>
       </nav>
       <div>
@@ -272,10 +272,11 @@ footer.site li a:hover{opacity:1;border-color:currentColor}
   var $=function(id){return document.getElementById(id)};
   function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 
+  function pathKey(){return decodeURIComponent((location.pathname.match(/^\/entri\/([^\/]+)/)||[])[1]||(location.hash||"").slice(1))}
   function render(){
     var ids=Object.keys(DATA);
     if(!ids.length){$("def").textContent="Memuat data…";return}
-    var key=decodeURIComponent((location.hash||"").slice(1));
+    var key=pathKey();
     if(!DATA[key])key=ids[0];
     var d=DATA[key];
     function lab(x){return esc(x.w)+(x.h?'<sup class="hm">'+esc(x.h)+'</sup>':"")}
@@ -290,7 +291,7 @@ footer.site li a:hover{opacity:1;border-color:currentColor}
     $("exs").parentNode.hidden=!d.x.length;
     var f=[["Jenis entri",JNS[d.j]||d.j],["Kelas kata",d.c?(CLS[d.c]||d.c):""],["Homonim",d.h],["Varian",d.v],["Rujukan",d.r],["Jumlah huruf",d.w.length],["Jumlah revisi",(HIST[key]||[]).length],["Status",d.q?d.q.replace(/;/g,", ").replace(/_/g," "):""]];
     $("facts").innerHTML=f.filter(function(r){return r[1]!==""}).map(function(r){return "<dt>"+r[0]+"</dt><dd>"+esc(r[1])+"</dd>"}).join("");
-    $("more").innerHTML=(function(){var i=ids.indexOf(key),a=Math.max(0,Math.min(i-6,ids.length-13));return ids.slice(a,a+13).filter(function(k){return k!==key})})().map(function(k){return '<a href="#'+k+'">'+lab(DATA[k])+'</a>'}).join("");
+    $("more").innerHTML=(function(){var i=ids.indexOf(key),a=Math.max(0,Math.min(i-6,ids.length-13));return ids.slice(a,a+13).filter(function(k){return k!==key})})().map(function(k){return '<a href="/entri/'+encodeURIComponent(k)+'" data-spa>'+lab(DATA[k])+'</a>'}).join("");
 
     var hs=(HIST[key]||[]).slice().sort(function(a,b){return a.t<b.t?1:a.t>b.t?-1:0}),shown=false;
     function fmtT(t){try{return new Date(t).toLocaleString("id-ID",{dateStyle:"medium",timeStyle:"short"})}catch(e){return t}}
@@ -331,7 +332,7 @@ footer.site li a:hover{opacity:1;border-color:currentColor}
   /* ===== CRUD: simpan lokal (localStorage) dan, bila KAMUS_CONFIG.addWordUrl diisi, kirim ke server ===== */
   var OPS=[],SERVER=false;
   try{OPS=JSON.parse(localStorage.getItem("kamus-crud")||"[]")}catch(e){}
-  function curKey(){var k=decodeURIComponent((location.hash||"").slice(1));return DATA[k]?k:Object.keys(DATA)[0]}
+  function curKey(){var k=pathKey();return DATA[k]?k:Object.keys(DATA)[0]}
   function applyOp(o){
     if(o.op==="hapus")delete DATA[o.id];else DATA[o.id]=o.entry;
     (HIST[o.id]=HIST[o.id]||[]).push(o.rev);
@@ -378,12 +379,12 @@ footer.site li a:hover{opacity:1;border-color:currentColor}
         var ch=changed(o,e);if(!ch.length)return Promise.resolve({ok:true,pesan:"Tidak ada perubahan."});
         return commit("sunting",e,snap(o),"Mengubah "+ch.join(", ")).then(function(r){if(r.ok){r.pesan="Perubahan tersimpan.";render()}return r});
       }
-      return commit("tambah",e,"","Kata baru: "+e.w).then(function(r){if(r.ok){r.pesan="Kata ditambahkan.";location.hash="#"+e.id;render()}return r});
+      return commit("tambah",e,"","Kata baru: "+e.w).then(function(r){if(r.ok){r.pesan="Kata ditambahkan.";history.pushState(null,"","/entri/"+encodeURIComponent(e.id));render()}return r});
     },
     remove:function(id){
       var g=guard();if(g){alert(g.pesan);return}
       var o=DATA[id];if(!o||!confirm("Hapus kata \""+o.w+(o.h?" ("+o.h+")":"")+"\"? Riwayatnya tetap tersimpan."))return;
-      commit("hapus",o,snap(o),"Menghapus "+o.w).then(function(r){if(r.ok){location.hash="";render()}else alert(r.pesan||"Gagal menghapus.")});
+      commit("hapus",o,snap(o),"Menghapus "+o.w).then(function(r){if(r.ok){history.pushState(null,"","/entri/");render()}else alert(r.pesan||"Gagal menghapus.")});
     }
   };
   $("btn-edit").onclick=function(){if(window.KAMUS_UI)window.KAMUS_UI.edit(DATA[curKey()])};
@@ -397,7 +398,12 @@ footer.site li a:hover{opacity:1;border-color:currentColor}
       OPS=[];try{localStorage.removeItem("kamus-crud")}catch(x){}render();
     }).catch(function(){kamusGalat(u?"":"Server belum disambungkan. Isi KAMUS_API di config.js.")});
   });
-  window.addEventListener("hashchange",render);
+  window.addEventListener("popstate",render);
+  document.addEventListener("click",function(e){
+    var a=e.target.closest("a[data-spa]");
+    if(!a||e.metaKey||e.ctrlKey||e.shiftKey||e.button)return;
+    e.preventDefault();history.pushState(null,"",a.getAttribute("href"));render();window.scrollTo(0,0);
+  });
   render();
 })();
 </script>
