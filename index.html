@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kamus Aceh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: hero kiri (judul + pencarian) dengan kartu entri melayang di kanan; di bawahnya indeks A-Z, daftar kata, dan fitur. */
+:root{
+  --bg:#EDF2EF;
+  --surface:#FFFFFF;
+  --ink:#0E2520;
+  --muted:#586D67;
+  --line:#D2DDD8;
+  --accent:#0A6B58;
+  --accent-ink:#FFFFFF;
+  --mark:#F2C14E;
+  --display:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
+  --text:"Newsreader",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --shadow:0 18px 40px -22px rgba(14,37,32,.45);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1916;--surface:#12251F;--ink:#E6F1ED;--muted:#93ABA3;--line:#23403A;
+    --accent:#5FD3B5;--accent-ink:#06201A;--mark:#E9B93F;
+    --shadow:0 18px 40px -22px rgba(0,0,0,.8);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1916;--surface:#12251F;--ink:#E6F1ED;--muted:#93ABA3;--line:#23403A;
+  --accent:#5FD3B5;--accent-ink:#06201A;--mark:#E9B93F;
+  --shadow:0 18px 40px -22px rgba(0,0,0,.8);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--text);font-size:18px;line-height:1.55;
+  padding-block:0 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  overflow-x:hidden;
+}
+.wrap{max-width:1120px;margin-inline:auto}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:1.35rem;letter-spacing:-.02em;text-decoration:none}
+.brand-mark{width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:1.15rem;transform:rotate(-6deg);transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+.brand:hover .brand-mark{transform:rotate(8deg) scale(1.08)}
+.nav{display:flex;align-items:center;gap:6px;font-family:var(--display);font-size:.95rem;font-weight:500}
+.nav a{padding:8px 12px;border-radius:999px;text-decoration:none;color:var(--muted);transition:background .2s,color .2s}
+.nav a:hover{background:var(--surface);color:var(--ink)}
+.theme{font-family:var(--display);font-size:.9rem;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer;transition:transform .2s}
+.theme:hover{transform:translateY(-2px)}
+
+/* hero */
+.hero{position:relative;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:40px;align-items:center;padding-block:48px 56px}
+.letters{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.letters span{position:absolute;font-family:var(--display);font-weight:800;color:var(--accent);opacity:.09;animation:drift linear infinite}
+@keyframes drift{from{transform:translateY(30px) rotate(var(--r0))}to{transform:translateY(-50px) rotate(var(--r1))}}
+.hero>*:not(.letters){position:relative;z-index:1}
+.eyebrow{font-family:var(--mono);font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px;margin:0 0 18px}
+.eyebrow i{width:9px;height:9px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent)}100%{box-shadow:0 0 0 12px transparent}}
+h1{font-family:var(--display);font-weight:800;font-stretch:80%;font-size:clamp(2.6rem,6.4vw,5rem);line-height:1.02;letter-spacing:-.035em;margin:0 0 20px;text-wrap:balance}
+.roll{display:inline-block;height:1.08em;overflow:hidden;vertical-align:bottom;background:linear-gradient(transparent 68%,var(--mark) 68%,var(--mark) 90%,transparent 90%);padding-right:.08em}
+.roll-in{display:flex;flex-direction:column;transition:transform .7s cubic-bezier(.7,0,.2,1)}
+.roll-in span{height:1.08em;line-height:1.08;display:block;white-space:nowrap}
+.lead{max-width:34em;color:var(--muted);font-size:1.15rem;margin:0 0 28px}
+
+/* search */
+.search{position:relative;max-width:560px}
+.field{display:flex;align-items:center;gap:10px;background:var(--surface);border:2px solid var(--ink);border-radius:18px;padding:8px 8px 8px 18px;box-shadow:6px 6px 0 var(--ink);transition:transform .2s,box-shadow .2s}
+.field:focus-within{transform:translate(-2px,-2px);box-shadow:9px 9px 0 var(--accent);border-color:var(--accent)}
+.field svg{flex:none;color:var(--muted)}
+.field input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-family:var(--display);font-size:1.25rem;font-weight:500;padding:10px 0;outline:none}
+.field input::placeholder{color:var(--muted);opacity:.8}
+.field button{flex:none;border:0;background:var(--accent);color:var(--accent-ink);font-family:var(--display);font-weight:700;font-size:1rem;padding:12px 20px;border-radius:12px;cursor:pointer;transition:transform .2s}
+.field button:hover{transform:scale(1.05)}
+.sugg{position:absolute;left:0;right:0;top:calc(100% + 14px);background:var(--surface);border:2px solid var(--ink);border-radius:16px;margin:0;padding:6px;list-style:none;z-index:5;box-shadow:var(--shadow);transform-origin:top;animation:pop .22s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(-6px) scaleY(.96)}to{opacity:1;transform:none}}
+.sugg li{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:10px;cursor:pointer;font-family:var(--display);font-weight:600}
+.sugg li small{font-family:var(--text);font-weight:400;color:var(--muted);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.sugg li[aria-selected="true"],.sugg li:hover{background:var(--bg)}
+.sugg .none{cursor:default;color:var(--muted);font-weight:400}
+.sugg mark{background:var(--mark);color:#0E2520;border-radius:3px;padding:0 1px}
+.recent{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px;align-items:center;font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:var(--display);font-weight:600;font-size:.9rem;padding:6px 12px;border-radius:999px;cursor:pointer;transition:transform .2s,border-color .2s}
+.chip:hover{transform:translateY(-2px);border-color:var(--accent)}
+
+/* entry card */
+.stage{display:grid;place-items:center;padding:10px}
+.card{width:100%;max-width:430px;background:var(--surface);border:2px solid var(--ink);border-radius:26px;padding:28px 28px 24px;box-shadow:var(--shadow);transform:rotate(2deg);animation:float 7s ease-in-out infinite}
+@keyframes float{0%,100%{transform:rotate(2deg) translateY(0)}50%{transform:rotate(1deg) translateY(-12px)}}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:var(--mono);font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.pill{background:var(--accent);color:var(--accent-ink);padding:3px 10px;border-radius:999px;font-size:.72rem;letter-spacing:.06em}
+.entry.swap{animation:swap .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes swap{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.w{font-family:var(--display);font-weight:800;font-stretch:80%;font-size:clamp(2.6rem,7vw,3.6rem);letter-spacing:-.03em;line-height:1;margin:0}
+.ph{font-family:var(--mono);font-size:.9rem;color:var(--accent);margin:8px 0 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.cls{border:1px solid var(--line);border-radius:6px;padding:0 7px;color:var(--muted);font-size:.78rem}
+.def{margin:0 0 14px;font-size:1.12rem}
+.ex{margin:0;padding-left:14px;border-left:3px solid var(--mark);font-style:italic;color:var(--muted)}
+.ex b{font-style:normal;font-weight:600;color:var(--ink)}
+.tr{margin:8px 0 0 17px;font-size:.95rem;color:var(--muted)}
+.card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:14px;border-top:1px dashed var(--line);font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+.card-foot button{font-family:var(--display);font-weight:700;font-size:.85rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.card-foot button:hover{border-color:var(--accent)}
+
+/* index */
+section{padding-block:36px}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+h2{font-family:var(--display);font-weight:800;font-stretch:85%;font-size:clamp(1.8rem,4vw,2.6rem);letter-spacing:-.03em;line-height:1.05;margin:0;text-wrap:balance}
+.tag{font-family:var(--mono);font-size:.78rem;color:var(--muted);letter-spacing:.06em}
+.az{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:26px}
+.az button{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:var(--display);font-weight:700;font-size:1rem;cursor:pointer;transition:transform .18s cubic-bezier(.3,1.6,.5,1),background .2s,color .2s}
+.az button:hover:not(:disabled){transform:translateY(-4px) rotate(-4deg);border-color:var(--accent)}
+.az button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.az button:disabled{opacity:.3;cursor:default}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.item{text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:18px;padding:18px;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-width:0;transition:transform .25s cubic-bezier(.3,1.4,.5,1),box-shadow .25s,border-color .25s;animation:rise .5s both;animation-delay:calc(var(--i)*35ms)}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.item:hover{transform:translateY(-6px);border-color:var(--accent);box-shadow:var(--shadow)}
+.item b{font-family:var(--display);font-size:1.4rem;font-weight:800;letter-spacing:-.02em}
+.item span{color:var(--muted);font-size:.95rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item em{font-family:var(--mono);font-style:normal;font-size:.72rem;color:var(--accent)}
+
+/* features */
+.feat{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+.f{grid-column:span 2;border:1px solid var(--line);border-radius:22px;padding:24px;background:var(--surface);min-width:0}
+.f:first-child{grid-column:span 4;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.f:first-child p{color:inherit;opacity:.88}
+.f h3{font-family:var(--display);font-weight:800;font-size:1.35rem;letter-spacing:-.02em;margin:14px 0 8px}
+.f p{margin:0;color:var(--muted)}
+.ico{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--bg);color:var(--accent)}
+.f:first-child .ico{background:rgba(255,255,255,.18);color:inherit}
+.type{font-family:var(--mono);font-size:.85rem;margin-top:16px;padding:10px 14px;border-radius:12px;background:rgba(0,0,0,.18);display:inline-block}
+.caret{display:inline-block;width:2px;height:1em;background:currentColor;vertical-align:-.15em;margin-left:2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+footer.site{margin-top:56px;background:var(--ink);color:var(--bg);border-radius:32px;padding:44px 40px 24px;display:flex;flex-direction:column;gap:36px}
+footer.site a{color:inherit}
+footer.site :focus-visible{outline-color:var(--bg)}
+.ft-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.2fr);gap:32px}
+.ft-grid>*{min-width:0}
+.ft-logo{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:1.4rem;letter-spacing:-.02em}
+.ft-mark{width:34px;height:34px;border-radius:10px;background:var(--bg);color:var(--ink);display:grid;place-items:center;font-size:1.1rem;transform:rotate(-6deg)}
+.ft-brand p{margin:14px 0 0;max-width:30em;font-size:1rem;line-height:1.55;opacity:.82}
+.ft-brand strong{font-family:var(--display);font-weight:800;background:linear-gradient(transparent 72%,color-mix(in srgb,var(--bg) 32%,transparent) 72%)}
+footer.site h3{font-family:var(--mono);font-weight:500;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;margin:0 0 14px;opacity:.6}
+footer.site ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+footer.site li a{font-family:var(--display);font-weight:600;font-size:1rem;text-decoration:none;opacity:.85;border-bottom:1px solid transparent;transition:opacity .2s,border-color .2s}
+footer.site li a:hover{opacity:1;border-color:currentColor}
+.ft-soc{display:flex;flex-wrap:wrap;gap:8px}
+.ft-soc a{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--bg) 35%,transparent);transition:transform .2s cubic-bezier(.3,1.6,.5,1),background .2s,color .2s}
+.ft-soc a:hover{background:var(--bg);color:var(--ink);transform:translateY(-4px) rotate(-5deg)}
+.ft-soc svg{width:20px;height:20px}
+.ft-note{margin:14px 0 0;font-size:.92rem;line-height:1.4;opacity:.7}
+.ft-bar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-top:20px;border-top:1px solid color-mix(in srgb,var(--bg) 22%,transparent);font-family:var(--mono);font-size:.76rem;opacity:.7}
+@media (max-width:860px){.ft-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ft-brand{grid-column:1/-1}footer.site{padding:34px 24px 20px}}
+@media (max-width:480px){.ft-grid{grid-template-columns:minmax(0,1fr)}}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:minmax(0,1fr);padding-block:28px 36px}
+  .f,.f:first-child{grid-column:span 6}
+  .nav a{display:none}
+}
+@media (max-width:480px){
+  .field{padding-left:14px}
+  .field button{padding:12px 14px}
+  .az button{width:36px;height:36px}
+  .card{padding:22px 20px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+[hidden]{display:none!important}
+
+/* tombol header, login, dan tambah kata */
+.hb-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hb{font-family:var(--display);font-weight:700;font-size:.9rem;padding:8px 16px;border-radius:999px;border:2px solid var(--ink);background:var(--surface);color:var(--ink);cursor:pointer;transition:transform .2s cubic-bezier(.3,1.6,.5,1),box-shadow .2s}
+.hb:hover{transform:translateY(-2px);box-shadow:3px 3px 0 var(--ink)}
+.hb-add{background:var(--accent);color:var(--accent-ink)}
+.md{position:fixed;inset:0;z-index:80;background:var(--scrim,rgba(8,20,17,.6));display:grid;place-items:center;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));animation:mdfade .2s both}
+@keyframes mdfade{from{opacity:0}to{opacity:1}}
+.md-panel{position:relative;width:100%;max-width:560px;max-height:100%;overflow-y:auto;background:var(--surface);color:var(--ink);border:2px solid var(--ink);border-radius:28px;padding:30px 28px 26px;box-shadow:var(--shadow);animation:mdin .35s cubic-bezier(.2,1.2,.4,1) both}
+@keyframes mdin{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
+.md-panel form{display:flex;flex-direction:column;gap:16px}
+.md-panel h2{font-family:var(--display);font-weight:800;font-stretch:85%;font-size:1.8rem;letter-spacing:-.03em;line-height:1.05;margin:0 40px 0 0}
+.md-panel .md-sub{margin:-8px 0 0;color:var(--muted);font-size:1rem}
+.md-x{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:12px;border:2px solid var(--ink);background:var(--bg);color:var(--ink);cursor:pointer;font-size:1.3rem;line-height:1}
+.md-x:hover{background:var(--ink);color:var(--bg)}
+.md-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld span{font-family:var(--mono);font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.fld input,.fld select,.fld textarea{width:100%;min-width:0;font-family:var(--display);font-weight:500;font-size:1rem;background:var(--bg);color:var(--ink);border:2px solid var(--ink);border-radius:14px;padding:11px 14px}
+.fld textarea{resize:vertical;min-height:84px;line-height:1.4}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.md-submit{font-family:var(--display);font-weight:700;font-size:1.05rem;border:2px solid var(--ink);background:var(--accent);color:var(--accent-ink);border-radius:14px;padding:12px 20px;cursor:pointer;box-shadow:4px 4px 0 var(--ink);transition:transform .15s,box-shadow .15s}
+.md-submit:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
+.md-submit:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.md-submit:disabled{opacity:.6;cursor:wait}
+.md-msg{margin:0;border-left:4px solid var(--mark);background:var(--bg);padding:10px 14px;border-radius:10px;font-size:.98rem;line-height:1.4}
+.md-msg.ok{border-color:var(--accent)}
+@media (max-width:520px){.md-row{grid-template-columns:minmax(0,1fr)}.md-panel{padding:26px 20px 22px}.hb{padding:7px 12px}}
+.hm{font-size:.45em;margin-left:3px;color:var(--accent);vertical-align:super}
+.xs{display:grid;gap:18px}
+.rj{margin:0;color:var(--muted);font-style:italic}
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#atas"><span class="brand-mark" aria-hidden="true">K</span>KAMUS ACEH</a>
+    <nav class="nav" aria-label="Navigasi">
+      <a href="#daftar">Daftar kata</a>
+      <a href="#fitur">Fitur</a>
+      <div class="hb-group"><button class="hb hb-add" type="button" data-open="add">+ Tambah kata</button><button class="hb" id="loginBtn" type="button" data-open="login">Login</button></div>
+    </nav>
+  </header>
+
+  <main id="atas">
+    <div class="hero">
+      <div class="letters" id="letters" aria-hidden="true"></div>
+
+      <div>
+        <p class="eyebrow"><i></i>Kamus Aceh–Indonesia</p>
+        <h1 aria-label="Temukan arti, lafal, dan contoh setiap kata">Temukan <span class="roll" aria-hidden="true"><span class="roll-in" id="roll"><span>arti</span><span>lafal</span><span>contoh</span><span>kelas</span></span></span> setiap kata.</h1>
+        <p class="lead">Ketik satu kata dan lihat maknanya, cara melafalkannya, dan kalimat contohnya dalam sekali pandang.</p>
+
+        <div class="search" id="cari">
+          <div class="field">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <input id="q" type="text" role="combobox" aria-expanded="false" aria-controls="sugg" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Cari kata, misalnya gampong" aria-label="Cari kata">
+            <button id="go" type="button">Cari</button>
+          </div>
+          <ul class="sugg" id="sugg" role="listbox" hidden></ul>
+        </div>
+
+        <div class="recent" id="recent" hidden><span>Terakhir dicari</span></div>
+      </div>
+
+      <div class="stage">
+        <article class="card" aria-live="polite">
+          <div class="card-head"><span id="cardLabel">Kata hari ini</span><span class="pill" id="cardCls">n</span></div>
+          <div class="entry" id="entry"></div>
+          <div class="card-foot"><span id="cardNo">Entri 1</span><button id="rand" type="button">Kata acak</button></div>
+        </article>
+      </div>
+    </div>
+
+    <section id="daftar">
+      <div class="sec-head">
+        <h2>Jelajahi menurut huruf</h2>
+        <span class="tag" id="count">isi kamus dari xlsx</span>
+      </div>
+      <div class="az" id="az" role="group" aria-label="Filter huruf awal"></div>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <section id="fitur">
+      <div class="sec-head"><h2>Dibuat untuk mencari cepat</h2></div>
+      <div class="feat">
+        <div class="f">
+          <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h6"/></svg></div>
+          <h3>Saran muncul saat mengetik</h3>
+          <p>Hasil menyempit setiap huruf. Gunakan panah atas dan bawah lalu Enter untuk memilih tanpa menyentuh mouse.</p>
+          <div class="type" aria-hidden="true"><span id="typed"></span><span class="caret"></span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site">
+    <div class="ft-grid">
+      <div class="ft-brand">
+        <div class="ft-logo"><span class="ft-mark" aria-hidden="true">K</span>KAMUS ACEH</div>
+        <p>Kamus Aceh–Indonesia online. Bagian dari <strong>Proyek Basa Aceh</strong>, upaya bersama mendokumentasikan dan menghidupkan kembali bahasa Aceh.</p>
+      </div>
+      <nav aria-label="Jelajahi">
+        <h3>Jelajahi</h3>
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="entri.html">Halaman satu kata</a></li>
+          <li><a href="kontributor.html">Kontributor</a></li>
+          <li><a href="profil.html">Profil kontributor</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Komunitas">
+        <h3>Komunitas</h3>
+        <ul>
+          <li><a href="kontributor.html#h-top">Tiga teratas</a></li>
+          <li><a href="kontributor.html#h-all">Semua kontributor</a></li>
+          <li><a href="kontributor.html#h-bd">Katalog lencana</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h3>Ikuti Proyek Basa Aceh</h3>
+        <!-- Ganti tautan di bawah dengan akun resmi Proyek Basa Aceh -->
+        <div class="ft-soc">
+        <a href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8"/></svg></a>
+        <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v6h4v-6h3l1-4h-4V8z"/></svg></a>
+        <a href="https://www.youtube.com/" target="_blank" rel="noopener" aria-label="YouTube" title="YouTube"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z"/></svg></a>
+        <a href="https://www.tiktok.com/" target="_blank" rel="noopener" aria-label="TikTok" title="TikTok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3v11a4 4 0 1 1-4-4M14 3c0 3 2 5 5 5"/></svg></a>
+        <a href="https://x.com/" target="_blank" rel="noopener" aria-label="X" title="X"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"/></svg></a>
+        <a href="https://github.com/" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4 1-4-2-6-2m12 4v-3c0-1 0-2-1-3 3 0 6-2 6-6a5 5 0 0 0-1-3 4 4 0 0 0 0-3s-1 0-3 1a10 10 0 0 0-5 0C8 3 7 3 7 3a4 4 0 0 0 0 3 5 5 0 0 0-1 3c0 4 3 6 6 6-1 1-1 2-1 3v3"/></svg></a>
+        <a href="https://t.me/" target="_blank" rel="noopener" aria-label="Telegram" title="Telegram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4L3 11l6 2 2 6 3-4 5 3z"/></svg></a>
+        </div>
+      </div>
+    </div>
+    <div class="ft-bar"><span>&copy; 2026 Proyek Basa Aceh</span></div>
+  </footer>
+</div>
+
+<script>
+function kamusMulai(DATA){
+  var $=function(id){return document.getElementById(id)};
+  var q=$("q"),sugg=$("sugg"),entry=$("entry"),grid=$("grid"),az=$("az");
+  var active=-1,matches=[],current=0,letter="";
+  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* huruf melayang di latar hero */
+  (function(){
+    var box=$("letters"),L="ABCDEGHJKLMNOPRSTUY",out="";
+    for(var i=0;i<14;i++){
+      var s=(i*37)%100,t=(i*53)%80;
+      out+='<span style="left:'+s+'%;top:'+t+'%;font-size:'+(50+(i*29)%90)+'px;animation-duration:'+(14+(i*7)%14)+'s;animation-delay:-'+((i*5)%16)+'s;--r0:'+(-20+(i*13)%40)+'deg;--r1:'+(-10+(i*17)%50)+'deg">'+L.charAt((i*5)%L.length)+'</span>';
+    }
+    box.innerHTML=out;
+  })();
+
+  /* kata yang berputar di judul */
+  (function(){
+    var r=$("roll"),n=r.children.length,i=0;
+    if(reduce)return;
+    setInterval(function(){i=(i+1)%n;r.style.transform="translateY(-"+(i*1.08)+"em)";},2200);
+  })();
+
+  /* teks mengetik di kartu fitur */
+  (function(){
+    var el=$("typed"),seq=["g","ga","gam","gampong","r","ru","rum","rumoh"],k=0;
+    if(reduce){el.textContent="gampong";return;}
+    setInterval(function(){el.textContent=seq[k%seq.length];k++;},520);
+  })();
+
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+  function lab(d){return esc(d.w)+(d.h?'<sup class="hm">'+esc(d.h)+'</sup>':"")}
+  function rd(d){return d.d||(d.r?"→ "+d.r:"Arti belum tercatat.")}
+  function hl(text,term){
+    var i=term?text.toLowerCase().indexOf(term):-1;
+    if(i<0)return esc(text);
+    return esc(text.slice(0,i))+"<mark>"+esc(text.slice(i,i+term.length))+"</mark>"+esc(text.slice(i+term.length));
+  }
+  function boldWord(sentence,word){
+    var stem=word.slice(0,Math.max(3,word.length-2)).toLowerCase();
+    return esc(sentence).replace(new RegExp("([A-Za-z]*"+stem+"[A-Za-z]*)","i"),"<b>$1</b>");
+  }
+
+  function show(i,label){
+    current=i;
+    var d=DATA[i];
+    $("cardLabel").textContent=label||"Entri kamus";
+    $("cardCls").textContent=d.c||d.j;
+    $("cardNo").textContent="Entri "+(i+1)+" dari "+DATA.length;
+    var ex=(d.x||[]).map(function(o){return '<p class="ex">'+boldWord(o.e,d.w)+'</p><p class="tr">'+esc(o.t)+'</p>'}).join("");
+    entry.innerHTML='<h2 class="w">'+lab(d)+'</h2><p class="ph">'+(d.v?'varian: '+esc(d.v)+' ':'')+'<span class="cls">'+esc(d.c||d.j)+'</span></p><p class="def">'+esc(rd(d))+'</p>'+ex+(d.d&&d.r?'<p class="rj">Lihat juga: '+esc(d.r)+'</p>':'');
+    entry.classList.remove("swap");void entry.offsetWidth;entry.classList.add("swap");
+  }
+
+  /* riwayat */
+  function getRecent(){try{return JSON.parse(localStorage.getItem("kamusku-recent")||"[]")}catch(e){return[]}}
+  function saveRecent(w){
+    var r=getRecent().filter(function(x){return x!==w});r.unshift(w);r=r.slice(0,5);
+    try{localStorage.setItem("kamusku-recent",JSON.stringify(r))}catch(e){}
+    drawRecent(r);
+  }
+  function drawRecent(r){
+    var box=$("recent");r=r||getRecent();
+    var valid=r.filter(function(w){return DATA.some(function(d){return d.id===w})});
+    box.querySelectorAll(".chip").forEach(function(c){c.remove()});
+    box.hidden=!valid.length;
+    valid.forEach(function(w){
+      var b=document.createElement("button");b.type="button";b.className="chip";b.textContent=DATA.filter(function(d){return d.id===w})[0].w;
+      b.onclick=function(){pick(w)};box.appendChild(b);
+    });
+  }
+
+  function pick(id,scroll){
+    var i=DATA.findIndex(function(d){return d.id===id});
+    if(i<0)return;
+    q.value=DATA[i].w;closeSugg();show(i,"Hasil pencarian");saveRecent(id);
+    if(scroll!==false&&window.innerWidth<=860){$("entry").scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"})}
+  }
+
+  /* saran */
+  function search(term){
+    term=term.trim().toLowerCase();
+    if(!term)return[];
+    var a=[],b=[];
+    DATA.forEach(function(d){
+      var w=d.w.toLowerCase(),k=(d.k||"").toLowerCase();
+      if(w.indexOf(term)===0||k.indexOf(term)===0)a.push(d);
+      else if(w.indexOf(term)>0||k.indexOf(term)>0||d.d.toLowerCase().indexOf(term)>=0)b.push(d);
+    });
+    return a.concat(b).slice(0,6);
+  }
+  function renderSugg(){
+    var term=q.value.trim().toLowerCase();
+    if(!term){closeSugg();return}
+    matches=search(term);active=matches.length?0:-1;
+    if(!matches.length){
+      sugg.innerHTML='<li class="none" role="option">Kata tidak ditemukan</li>';
+    }else{
+      sugg.innerHTML=matches.map(function(d,i){
+        return '<li role="option" data-id="'+esc(d.id)+'" aria-selected="'+(i===0)+'">'+hl(d.w,term)+(d.h?' <sup class="hm">'+esc(d.h)+'</sup>':'')+'<small>'+esc(rd(d))+'</small></li>';
+      }).join("");
+    }
+    sugg.hidden=false;q.setAttribute("aria-expanded","true");
+  }
+  function closeSugg(){sugg.hidden=true;q.setAttribute("aria-expanded","false");active=-1}
+  function mark(){
+    Array.prototype.forEach.call(sugg.children,function(li,i){li.setAttribute("aria-selected",String(i===active))});
+  }
+  q.addEventListener("input",renderSugg);
+  q.addEventListener("focus",renderSugg);
+  q.addEventListener("keydown",function(e){
+    if(e.key==="ArrowDown"&&matches.length){e.preventDefault();active=(active+1)%matches.length;mark()}
+    else if(e.key==="ArrowUp"&&matches.length){e.preventDefault();active=(active-1+matches.length)%matches.length;mark()}
+    else if(e.key==="Enter"){e.preventDefault();submit()}
+    else if(e.key==="Escape"){closeSugg()}
+  });
+  function submit(){
+    if(!q.value.trim())return;
+    renderSugg();
+    var t=q.value.trim().toLowerCase();
+    var exact=DATA.find(function(d){return d.w.toLowerCase()===t||(d.k||"").toLowerCase()===t});
+    var m=exact||(matches[active>=0?active:0]);
+    if(m)pick(m.id);
+  }
+  $("go").addEventListener("click",submit);
+  sugg.addEventListener("mousedown",function(e){
+    var li=e.target.closest("li[data-id]");
+    if(li){e.preventDefault();pick(li.getAttribute("data-id"))}
+  });
+  document.addEventListener("click",function(e){if(!e.target.closest(".search"))closeSugg()});
+
+  /* indeks A-Z dan daftar */
+  var letters=[];
+  DATA.forEach(function(d){var c=d.H;if(letters.indexOf(c)<0)letters.push(c)});
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(function(c){
+    var b=document.createElement("button");b.type="button";b.textContent=c;
+    b.setAttribute("aria-pressed","false");
+    if(letters.indexOf(c)<0)b.disabled=true;
+    b.onclick=function(){
+      letter=(letter===c)?"":c;
+      az.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",String(x.textContent===letter))});
+      drawGrid();
+    };
+    az.appendChild(b);
+  });
+  var seen={},SAMPLE=DATA.filter(function(d){if(!d.d||!d.x.length||seen[d.w])return false;seen[d.w]=1;return true}).slice(0,6);
+  function drawGrid(){
+    var list=SAMPLE.filter(function(d){return !letter||d.H===letter});
+    $("count").textContent=list.length+" kata contoh dari "+DATA.length+" entri"+(letter?" berawalan "+letter:"")+" · cari kata di atas untuk melihat semuanya";
+    grid.innerHTML=list.map(function(d,i){
+      return '<button class="item" type="button" data-id="'+esc(d.id)+'" style="--i:'+i+'"><em>'+esc(d.c||d.j)+'</em><b>'+lab(d)+'</b><span>'+esc(rd(d))+'</span></button>';
+    }).join("");
+  }
+  grid.addEventListener("click",function(e){
+    var it=e.target.closest(".item");
+    if(!it)return;
+    pick(it.getAttribute("data-id"),false);
+    $("atas").scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"});
+  });
+
+  $("rand").addEventListener("click",function(){
+    var i;do{i=Math.floor(Math.random()*DATA.length)}while(i===current&&DATA.length>1);
+    q.value="";closeSugg();show(i,"Kata acak");
+  });
+
+
+  /* awal */
+  var day=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/864e5);
+  show(day%DATA.length,"Kata hari ini");
+  drawGrid();drawRecent();
+}
+kamusAmbil("data").then(function(r){if(!r||!r.ok)throw 0;kamusMulai(r.entri)}).catch(function(){kamusGalat()});
+</script>
+
+<div class="md" id="md" hidden>
+  <div class="md-panel" role="dialog" aria-modal="true" aria-label="Login atau tambah kata">
+    <button class="md-x" id="md-x" type="button" aria-label="Tutup">&times;</button>
+
+    <form id="f-login" hidden novalidate>
+      <h2>Masuk</h2>
+      <p class="md-sub">Masuk untuk menambah kata dan mengelola kontribusimu.</p>
+      <label class="fld"><span>Nama pengguna atau email</span><input id="lg-user" type="text" autocomplete="username" spellcheck="false"></label>
+      <label class="fld"><span>Kata sandi</span><input id="lg-pass" type="password" autocomplete="current-password"></label>
+      <p class="md-msg" id="ms-login" role="status" hidden></p>
+      <button class="md-submit" id="lg-go" type="submit">Masuk</button>
+    </form>
+
+    <form id="f-add" hidden>
+      <h2>Tambah kata</h2>
+      <p class="md-sub">Usulkan kata baru. Kata akan diperiksa dulu sebelum tampil di kamus.</p>
+      <div class="md-row">
+        <label class="fld"><span>Kata (Aceh)</span><input id="ad-w" type="text" required spellcheck="false" autocomplete="off"></label>
+        <label class="fld"><span>Homonim (nomor, jika ada)</span><input id="ad-l" type="text" inputmode="numeric" placeholder="1" autocomplete="off"></label>
+      </div>
+      <label class="fld"><span>Jenis entri</span>
+        <select id="ad-j">
+          <option value="kata">Kata</option>
+          <option value="rujukan">Rujukan</option>
+          <option value="bunyi">Bunyi</option>
+          <option value="nama_diri">Nama diri</option>
+        </select>
+      </label>
+      <label class="fld"><span>Kelas kata</span>
+        <select id="ad-c">
+          <option value="n">Nomina (kata benda)</option>
+          <option value="v">Verba (kata kerja)</option>
+          <option value="a">Adjektiva (kata sifat)</option>
+          <option value="adv">Adverbia (kata keterangan)</option>
+          <option value="">Tidak ada</option>
+        </select>
+      </label>
+      <label class="fld"><span>Varian (pisahkan dengan titik koma)</span><input id="ad-v" type="text" autocomplete="off"></label>
+      <label class="fld"><span>Arti (bahasa Indonesia)</span><textarea id="ad-d"></textarea></label>
+      <label class="fld"><span>Contoh kalimat (Aceh)</span><input id="ad-e" type="text" autocomplete="off"></label>
+      <label class="fld"><span>Terjemahan contoh</span><input id="ad-t" type="text" autocomplete="off"></label>
+      <label class="fld"><span>Rujukan (lihat juga)</span><input id="ad-r" type="text" autocomplete="off"></label>
+      <p class="md-msg" id="ms-add" role="status" hidden></p>
+      <button class="md-submit" id="ad-go" type="submit">Kirim usulan</button>
+    </form>
+  </div>
+</div>
+
+<script>
+/* Tombol Tambah kata dan Login.
+   Halaman ini belum punya server. Isi dua alamat di bawah dengan alamat API
+   (misalnya Google Apps Script) agar login dan pengiriman kata benar-benar berjalan.
+   Tanpa alamat, login ditolak dan usulan kata hanya disimpan sebagai draf di perangkat ini. */
+(function(){
+  var CFG=KAMUS_CONFIG;
+  var $=function(id){return document.getElementById(id)};
+  var md=$("md"),fl=$("f-login"),fa=$("f-add"),last=null,pending=null,token=null,nama="";
+  try{token=sessionStorage.getItem("kamus-token");nama=sessionStorage.getItem("kamus-nama")||""}catch(e){}
+
+  function paint(){
+    var b=$("loginBtn");
+    b.textContent=token?"Keluar"+(nama?" ("+nama.split(" ")[0]+")":""):"Login";
+    b.setAttribute("aria-label",token?"Keluar dari akun":"Masuk ke akun");
+  }
+  function msg(el,text,ok){el.textContent=text||"";el.className="md-msg"+(ok?" ok":"");el.hidden=!text}
+  function show(which,trigger){
+    last=trigger||document.activeElement;
+    fl.hidden=which!=="login";fa.hidden=which!=="add";
+    msg($("ms-login"),"");msg($("ms-add"),"");
+    md.hidden=false;document.body.style.overflow="hidden";
+    var first=which==="login"?$("lg-user"):$("ad-w");
+    setTimeout(function(){first.focus()},30);
+  }
+  function hide(){
+    md.hidden=true;document.body.style.overflow="";
+    if(last&&document.body.contains(last))last.focus();
+  }
+  function post(url,body){
+    return fetch(url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)}).then(function(r){return r.json()});
+  }
+
+  document.querySelectorAll("[data-open]").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var w=btn.getAttribute("data-open");
+      if(w==="login"){
+        if(token){
+          token=null;nama="";
+          try{sessionStorage.removeItem("kamus-token");sessionStorage.removeItem("kamus-nama")}catch(e){}
+          paint();
+        }else{pending=null;show("login",btn)}
+      }else{
+        if(CFG.loginUrl&&!token){pending="add";show("login",btn);msg($("ms-login"),"Masuk dulu untuk menambah kata.")}
+        else show("add",btn);
+      }
+    });
+  });
+
+  fl.addEventListener("submit",function(e){
+    e.preventDefault();
+    var u=$("lg-user").value.trim(),p=$("lg-pass").value,m=$("ms-login"),go=$("lg-go");
+    if(!u||!p){msg(m,"Isi nama pengguna dan kata sandi.");return}
+    if(!CFG.loginUrl){msg(m,"Server login belum disambungkan, jadi belum ada akun yang bisa masuk. Isi loginUrl di KAMUS_CONFIG pada file ini.");return}
+    go.disabled=true;
+    post(CFG.loginUrl,{aksi:"login",user:u,pass:p}).then(function(d){
+      if(d&&d.ok){
+        token=d.token||"ok";nama=d.nama||u;
+        try{sessionStorage.setItem("kamus-token",token);sessionStorage.setItem("kamus-nama",nama)}catch(e){}
+        $("lg-pass").value="";paint();
+        if(pending==="add"){pending=null;show("add",last)}else hide();
+      }else msg(m,(d&&d.pesan)||"Nama pengguna atau kata sandi salah.");
+    }).catch(function(){msg(m,"Tidak dapat menghubungi server. Coba lagi nanti.")}).then(function(){go.disabled=false});
+  });
+
+  fa.addEventListener("submit",function(e){
+    e.preventDefault();
+    var m=$("ms-add"),go=$("ad-go");
+    var obj={kata_kepala:$("ad-w").value.trim(),homonim:$("ad-l").value.trim(),varian:$("ad-v").value.trim(),jenis_entri:$("ad-j").value,tipe_kata:$("ad-c").value,arti_indonesia:$("ad-d").value.trim(),contoh_1:$("ad-e").value.trim(),arti_1:$("ad-t").value.trim(),rujukan:$("ad-r").value.trim()};
+    if(!obj.kata_kepala||!(obj.arti_indonesia||obj.rujukan)){msg(m,"Isi kata dan artinya (atau rujukannya).");return}
+    if(!CFG.addWordUrl){
+      try{
+        var a=JSON.parse(localStorage.getItem("kamus-draf-kata")||"[]");
+        obj.waktu=new Date().toISOString();a.push(obj);
+        localStorage.setItem("kamus-draf-kata",JSON.stringify(a));
+        msg(m,"Server belum disambungkan, jadi usulan ini belum terkirim. Isinya disimpan sebagai draf di perangkat ini.",true);
+        fa.reset();
+      }catch(err){msg(m,"Server belum disambungkan dan draf tidak bisa disimpan di perangkat ini.")}
+      return;
+    }
+    go.disabled=true;
+    post(CFG.addWordUrl,{aksi:"tambah_kata",token:token,data:obj}).then(function(d){
+      if(d&&d.ok){msg(m,"Usulan terkirim dan menunggu pemeriksaan.",true);fa.reset()}
+      else msg(m,(d&&d.pesan)||"Usulan gagal dikirim.");
+    }).catch(function(){msg(m,"Tidak dapat menghubungi server. Coba lagi nanti.")}).then(function(){go.disabled=false});
+  });
+
+  $("md-x").addEventListener("click",hide);
+  md.addEventListener("mousedown",function(e){if(e.target===md)hide()});
+  document.addEventListener("keydown",function(e){
+    if(md.hidden)return;
+    if(e.key==="Escape"){hide();return}
+    if(e.key==="Tab"){
+      var f=Array.prototype.filter.call(md.querySelectorAll("button,input,select,textarea"),function(x){return !x.disabled&&!x.closest("[hidden]")});
+      if(!f.length)return;
+      var a=f[0],z=f[f.length-1];
+      if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}
+      else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}
+    }
+  });
+  paint();
+})();
+</script>
+</body>
+</html>
