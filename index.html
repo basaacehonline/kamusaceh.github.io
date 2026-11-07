@@ -374,7 +374,7 @@ function kamusMulai(DATA){
     $("cardCls").textContent=d.c||d.j;
     $("cardNo").textContent="Entri "+(i+1)+" dari "+DATA.length;
     var ex=(d.x||[]).map(function(o){return '<p class="ex">'+boldWord(o.e,d.w)+'</p><p class="tr">'+esc(o.t)+'</p>'}).join("");
-    entry.innerHTML='<h2 class="w">'+lab(d)+'</h2><p class="ph">'+(d.v?'varian: '+esc(d.v)+' ':'')+'<span class="cls">'+esc(d.c||d.j)+'</span></p><p class="def">'+esc(rd(d))+'</p>'+ex+(d.d&&d.r?'<p class="rj">Lihat juga: '+esc(d.r)+'</p>':'');
+    entry.innerHTML='<h2 class="w">'+lab(d)+'</h2><p class="ph">'+(d.v?'varian: '+esc(d.v)+' ':'')+'<span class="cls">'+esc(d.c||d.j)+'</span></p><p class="def">'+esc(rd(d))+'</p>'+ex+(d.d&&d.r?'<p class="rj">Lihat juga: '+esc(d.r)+'</p>':'')+'<p class="rj"><a href="/entri/'+encodeURIComponent(d.id)+'">Buka halaman kata →</a></p>';
     entry.classList.remove("swap");void entry.offsetWidth;entry.classList.add("swap");
   }
 
@@ -399,8 +399,8 @@ function kamusMulai(DATA){
   function pick(id,scroll){
     var i=DATA.findIndex(function(d){return d.id===id});
     if(i<0)return;
-    q.value=DATA[i].w;closeSugg();show(i,"Hasil pencarian");saveRecent(id);
-    if(scroll!==false&&window.innerWidth<=860){$("entry").scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"})}
+    q.value=DATA[i].w;closeSugg();saveRecent(id);
+    location.href="/entri/"+encodeURIComponent(id);
   }
 
   /* saran */
