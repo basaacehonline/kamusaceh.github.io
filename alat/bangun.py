@@ -129,6 +129,6 @@ for r in rows[1:]:
 st = [SITE + "/", SITE + "/kontributor/"] + urls
 tulis("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
       "".join(f"  <url><loc>{e(u)}</loc><lastmod>{HARI}</lastmod></url>\n" for u in st) + "</urlset>\n")
-tulis("robots.txt", f"User-agent: *\nAllow: /\nDisallow: /profil/\nDisallow: /riwayat/\nDisallow: /entri/index.html\n\nSitemap: {SITE}/sitemap.xml\n")
+tulis("robots.txt", f"User-agent: *\nAllow: /\nDisallow: /profil/\nDisallow: /riwayat/\nDisallow: /pdf/\nDisallow: /entri/index.html\n\nSitemap: {SITE}/sitemap.xml\n")
 tulis("favicon.svg", '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#0A6B58"/><text x="32" y="46" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="40" fill="#fff">K</text></svg>\n')
 print(f"halaman kata: {len(urls)}; sitemap: {len(st)} URL")

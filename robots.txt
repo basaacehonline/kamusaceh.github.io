@@ -2,6 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /profil/
 Disallow: /riwayat/
+Disallow: /pdf/
 Disallow: /entri/index.html
 
 Sitemap: https://kamusaceh.github.io/sitemap.xml
