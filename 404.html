@@ -35,7 +35,7 @@ a{color:var(--accent);font-weight:700}
 /* GitHub Pages tidak punya rewrite. Alamat dinamis seperti /entri/xxx jatuh ke sini,
    lalu halaman /entri/ atau /profil/ dimuat dan membaca bagian akhir alamat. */
 (function(){
-  var p=location.pathname,m=p.match(/^\/(entri|profil)\/[^\/]+\/?$/);
+  var p=location.pathname,m=p.match(/^\/(entri|profil|riwayat)\/[^\/]+\/?$/);
   if(m){
     fetch("/"+m[1]+"/").then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(h){
       document.open();document.write(h);document.close();

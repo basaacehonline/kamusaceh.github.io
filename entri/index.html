@@ -82,7 +82,8 @@ a{color:inherit}
 .eyebrow{position:relative;font-family:var(--mono);font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px;margin:0 0 14px}
 .eyebrow i{width:9px;height:9px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-out infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent)}100%{box-shadow:0 0 0 12px transparent}}
-h1{position:relative;margin:0;font-family:var(--display);font-weight:800;font-stretch:78%;font-size:clamp(4rem,17vw,12rem);line-height:.95;letter-spacing:-.045em;display:flex;flex-wrap:wrap}
+h1{position:relative;margin:0;font-family:var(--display);font-weight:700;font-stretch:100%;font-size:clamp(3.5rem,14vw,9.5rem);line-height:1;letter-spacing:.01em;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 .04em}
+h1 .hm{align-self:flex-start;margin-top:.12em}
 h1 span{display:inline-block;animation:drop .8s cubic-bezier(.2,1.3,.4,1) both;animation-delay:calc(var(--i)*70ms)}
 @keyframes drop{from{opacity:0;transform:translateY(-.5em) rotate(-8deg)}to{opacity:1;transform:none}}
 .under{position:relative;height:.9rem;max-width:min(100%,640px);margin-top:10px;background:var(--mark);border-radius:999px;transform-origin:left;animation:grow 1s .5s cubic-bezier(.7,0,.2,1) both}
@@ -185,7 +186,7 @@ footer.site li a:hover{opacity:1;border-color:currentColor}
 .hist .df{margin:6px 0 0;font-size:.92rem;color:var(--muted)}
 .hist .df del{color:var(--muted)}
 .hist .df ins{text-decoration:none;font-weight:700;color:var(--ink)}
-.hmore{margin-top:14px;font:inherit;font-weight:700;cursor:pointer;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:8px 18px;color:var(--ink)}
+.hmore{display:inline-block;text-decoration:none;margin-top:14px;font:inherit;font-weight:700;cursor:pointer;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:8px 18px;color:var(--ink)}
 .crud{display:grid;gap:10px;margin-top:10px}
 .copy.danger{background:transparent;color:var(--ink);border:2px solid var(--ink)}
 .exrow{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:8px}
@@ -223,7 +224,7 @@ footer.site li a:hover{opacity:1;border-color:currentColor}
         <section class="blk" id="histblk">
           <p class="lab" id="histlab">Riwayat suntingan</p>
           <ol class="hist" id="hist"></ol>
-          <button class="hmore" id="hmore" type="button" hidden></button>
+          <a class="hmore" id="hmore" href="#" hidden></a>
         </section>
       </div>
 
@@ -335,12 +336,12 @@ footer.site li a:hover{opacity:1;border-color:currentColor}
       return '<li class="'+(v.a==="tambah"?"":"ed")+'"><div class="hd"><span class="ac">'+esc(v.a)+'</span><b>'+esc(v.u)+'</b><span class="mt">'+esc(fmtT(v.t))+' · '+esc(v.r)+'</span></div>'+
         (v.s?'<p class="sm">'+esc(v.s)+'</p>':'')+(v.m?'<p class="df">Membatalkan '+esc(v.m)+'</p>':'')+(df?'<p class="df">'+df+'</p>':'')+'</li>';
     }
-    var LIM=5;
+    var LIM=3;
     function drawHist(all){
-      $("hist").innerHTML=(all?hs:hs.slice(0,LIM)).map(item).join("");
-      var mb=$("hmore");mb.hidden=hs.length<=LIM;
-      mb.textContent=all?"Ringkas riwayat":"Tampilkan semua ("+hs.length+" revisi)";
-      mb.onclick=function(){drawHist(!all)};
+      $("hist").innerHTML=hs.slice(0,LIM).map(item).join("");
+      var mb=$("hmore");mb.hidden=!hs.length;
+      mb.textContent="Lihat riwayat lengkap ("+hs.length+" revisi) →";
+      mb.setAttribute("href","/riwayat/"+encodeURIComponent(key)+"/");
     }
     $("histlab").textContent="Riwayat suntingan ("+hs.length+")";
     $("histblk").hidden=!hs.length;
