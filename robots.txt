@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /profil/
+Disallow: /entri/index.html
+
+Sitemap: https://kamusaceh.github.io/sitemap.xml
