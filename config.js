@@ -13,7 +13,7 @@ function kamusGalat(pesan) {
   if (!el) {
     el = document.createElement("div");
     el.id = "kamus-galat"; el.setAttribute("role", "alert");
-    el.style.cssText = "position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;padding:14px 18px;border:2px solid currentColor;border-radius:14px;background:Canvas;color:CanvasText;font:600 15px/1.4 system-ui,sans-serif;text-align:center";
+    el.style.cssText = "position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;padding:14px 18px;border:2px solid currentColor;border-radius:14px;background:Canvas;color:CanvasText;font:600 16px/1.4 system-ui,sans-serif";
     document.body.appendChild(el);
     el.textContent = pesan || "Tidak dapat memuat data dari server. Coba muat ulang, atau periksa KAMUS_API di config.js.";
   } else if (pesan) el.textContent = pesan;
@@ -51,4 +51,29 @@ function kamusAcak() {
   function pilih(e) { var a = e.target && e.target.closest ? e.target.closest("a") : null; if (cocok(a)) acak(a); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", semua); else semua();
   ["pointerdown", "click", "auxclick", "keydown"].forEach(function (n) { document.addEventListener(n, pilih, true); });
+})();
+
+/* Sembunyikan tombol sunting dan hapus pada halaman entri bagi pengguna yang belum masuk. */
+(function () {
+  var style = document.createElement("style");
+  style.textContent = ".crud{display:none!important}.crud.authenticated{display:grid!important}";
+  document.head.appendChild(style);
+
+  function sinkronCrud() {
+    var crud = document.querySelector(".crud");
+    if (!crud) return;
+    var token = null;
+    try { token = sessionStorage.getItem("kamus-token"); } catch (e) {}
+    crud.classList.toggle("authenticated", !!token);
+  }
+  function mulai() {
+    sinkronCrud();
+    var tombolLogin = document.getElementById("loginBtn");
+    if (tombolLogin && window.MutationObserver) {
+      new MutationObserver(sinkronCrud).observe(tombolLogin, { childList: true, subtree: true, characterData: true });
+    }
+    window.addEventListener("storage", sinkronCrud);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mulai);
+  else mulai();
 })();
