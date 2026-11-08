@@ -24,7 +24,8 @@ function kamusAmbil(aksi) {
     kamusGalat("Server belum disambungkan. Isi KAMUS_API di config.js dengan URL aplikasi web Apps Script.");
     return Promise.reject(new Error("KAMUS_API kosong"));
   }
-  return fetch(KAMUS_API + (KAMUS_API.indexOf("?") < 0 ? "?" : "&") + "aksi=" + aksi).then(function (r) { return r.json(); });
+  /* cache:"no-store" + penanda waktu: data selalu diambil baru dari server, tidak dari cache peramban */
+  return fetch(KAMUS_API + (KAMUS_API.indexOf("?") < 0 ? "?" : "&") + "aksi=" + aksi + "&_=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.json(); });
 }
 
 /* bentuk data kontributor dari server -> bentuk yang dipakai halaman */
