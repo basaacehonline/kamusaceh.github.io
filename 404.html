@@ -279,5 +279,24 @@ footer.site li a:hover{opacity:1;border-color:currentColor}
   }
 })();
 </script>
+<script>
+/* Tautan ke beranda: "/" menjadi "/?" + 4 karakter acak (huruf campur angka), mis. /?k3x9.
+   Sama dengan kode di config.js; 404.html tidak memuat config.js. */
+(function(){
+  function acakKode(){
+    var h="abcdefghijklmnopqrstuvwxyz",d="0123456789",s=h+d,a=[],i,j,t,r=function(n){return Math.floor(Math.random()*n)};
+    a.push(h.charAt(r(26)),d.charAt(r(10)),s.charAt(r(36)),s.charAt(r(36)));
+    for(i=a.length-1;i>0;i--){j=r(i+1);t=a[i];a[i]=a[j];a[j]=t}
+    return a.join("");
+  }
+  function acak(a){a.setAttribute("href","/?"+acakKode());a.setAttribute("data-beranda","")}
+  function cocok(a){return a&&(a.getAttribute("href")==="/"||a.hasAttribute("data-beranda"))}
+  var l=document.querySelectorAll('a[href="/"]'),i;
+  for(i=0;i<l.length;i++)acak(l[i]);
+  ["pointerdown","click","auxclick","keydown"].forEach(function(n){
+    document.addEventListener(n,function(e){var a=e.target&&e.target.closest?e.target.closest("a"):null;if(cocok(a))acak(a)},true);
+  });
+})();
+</script>
 </body>
 </html>

@@ -33,3 +33,22 @@ function kamusOrang(x) {
   var bln = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"], j = String(x.j || ""), m = j.match(/^(\d{4})-(\d{2})/);
   return { n: x.n || x.username, r: x.r, j: m ? bln[+m[2] - 1] + " " + m[1] : j, kata: x.kata, sunting: x.sunting, verif: x.verif, lafal: x.lafal, streak: x.streak };
 }
+
+/* Tautan ke beranda: "/" diubah menjadi "/?" + 4 karakter acak campuran huruf dan angka, mis. /?k3x9.
+   Alamat selalu baru, jadi beranda dimuat dari server dan tidak dari cache peramban.
+   Tanpa JavaScript tautan tetap "/". Kode yang sama ada di 404.html (halaman itu tidak memuat file ini). */
+function kamusAcak() {
+  var h = "abcdefghijklmnopqrstuvwxyz", d = "0123456789", s = h + d, a = [], i, j, t;
+  var r = function (n) { return Math.floor(Math.random() * n); };
+  a.push(h.charAt(r(26)), d.charAt(r(10)), s.charAt(r(36)), s.charAt(r(36)));   /* minimal satu huruf dan satu angka */
+  for (i = a.length - 1; i > 0; i--) { j = r(i + 1); t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a.join("");
+}
+(function () {
+  function acak(a) { a.setAttribute("href", "/?" + kamusAcak()); a.setAttribute("data-beranda", ""); }
+  function cocok(a) { return a && (a.getAttribute("href") === "/" || a.hasAttribute("data-beranda")); }
+  function semua() { var l = document.querySelectorAll('a[href="/"],a[data-beranda]'), i; for (i = 0; i < l.length; i++) acak(l[i]); }
+  function pilih(e) { var a = e.target && e.target.closest ? e.target.closest("a") : null; if (cocok(a)) acak(a); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", semua); else semua();
+  ["pointerdown", "click", "auxclick", "keydown"].forEach(function (n) { document.addEventListener(n, pilih, true); });
+})();
